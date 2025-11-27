@@ -7,7 +7,7 @@
 .completed-tab-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 1rem 0;
 }
 
@@ -23,12 +23,12 @@
 
 .empty-state h3 {
   margin: 0 0 0.5rem 0;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .empty-state p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .completed-projects-list {
@@ -38,10 +38,11 @@
 }
 
 .completed-project {
-  background: white;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 1rem;
   padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .completed-project-header {
@@ -54,7 +55,7 @@
 .completed-project-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -80,7 +81,7 @@
 .completed-tasks-preview {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: #f9fafb;
+  background: var(--bg-primary);
   border-radius: 0.5rem;
 }
 
@@ -106,7 +107,7 @@
 }
 
 .preview-title {
-  color: #6b7280;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -127,9 +128,9 @@
 .reopen-btn {
   flex: 1;
   padding: 0.5rem 1rem;
-  background: #f3f4f6;
-  color: #374151;
-  border: none;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -138,7 +139,7 @@
 }
 
 .reopen-btn:hover {
-  background: #e5e7eb;
+  background: var(--bg-secondary);
 }
 
 .delete-btn {

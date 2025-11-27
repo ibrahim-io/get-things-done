@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { generateTasks } from '../services/openai';
 import { useApp } from '../hooks/useApp';
-import type { Project } from '../types';
+import type { Project, Priority } from '../types';
 import './ProjectInput.css';
 
 export function ProjectInput() {
   const [projectIdea, setProjectIdea] = useState('');
+  const [priority, setPriority] = useState<Priority>('medium');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { dispatch } = useApp();
@@ -59,10 +62,16 @@ export function ProjectInput() {
         tasks,
         completed: false,
         createdAt: new Date(),
+        priority,
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
       };
 
       dispatch({ type: 'ADD_PROJECT', payload: newProject });
       setProjectIdea('');
+      setPriority('medium');
+      setStartDate('');
+      setEndDate('');
       resetTranscript();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate tasks');
@@ -115,6 +124,53 @@ export function ProjectInput() {
               Listening...
             </p>
           )}
+        </div>
+
+        <div className="details-section">
+          <div className="form-group">
+            <label htmlFor="priority" className="input-label">
+              Priority <span className="optional-text">(Optional)</span>
+            </label>
+            <select
+              id="priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as Priority)}
+              className="select-input"
+              disabled={isLoading}
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="startDate" className="input-label">
+              Start Date <span className="optional-text">(Optional)</span>
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="date-input"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="endDate" className="input-label">
+              End Date <span className="optional-text">(Optional)</span>
+            </label>
+            <input
+              type="date"
+              id="endDate"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="date-input"
+              disabled={isLoading}
+            />
+          </div>
         </div>
 
         {error && <p className="error-message">{error}</p>}

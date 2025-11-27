@@ -1,7 +1,18 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { Project, Task, TabType } from '../types';
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  doc, 
+  updateDoc, 
+  deleteDoc, 
+  writeBatch 
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import type { Project, Task, TabType, Priority } from '../types';
 import { saveProjects, loadProjects } from '../services/storage';
+import { useAuth } from './AuthContext';
 
 interface AppState {
   projects: Project[];
@@ -9,6 +20,7 @@ interface AppState {
   focusMode: boolean;
   currentTaskIndex: number;
   activeTab: TabType;
+  loading: boolean;
 }
 
 type Action =
@@ -28,6 +40,7 @@ type Action =
   | { type: 'REORDER_TASKS'; payload: { projectId: string; tasks: Task[] } }
   | { type: 'COMPLETE_PROJECT'; payload: string }
   | { type: 'REOPEN_PROJECT'; payload: string }
+  | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ACTIVE_TAB'; payload: TabType };
 
 const initialState: AppState = {
@@ -36,12 +49,16 @@ const initialState: AppState = {
   focusMode: false,
   currentTaskIndex: 0,
   activeTab: 'active',
+  loading: true,
 };
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_PROJECTS':
-      return { ...state, projects: action.payload };
+      return { ...state, projects: action.payload, loading: false };
+    
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
 
     case 'ADD_PROJECT':
       return {
@@ -204,28 +221,233 @@ export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { user, loading: authLoading } = useAuth();
 
-  // Load projects from localStorage on mount
+  // Load projects based on auth state
   useEffect(() => {
-    const savedProjects = loadProjects();
-    if (savedProjects.length > 0) {
-      dispatch({ type: 'SET_PROJECTS', payload: savedProjects });
-      const activeProject = savedProjects.find(p => !p.completed);
-      if (activeProject) {
-        dispatch({ type: 'SET_ACTIVE_PROJECT', payload: activeProject.id });
+    if (authLoading) return;
+
+    const fetchProjects = async () => {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      if (user) {
+        try {
+          // Fetch Projects
+          const projectsQuery = query(
+            collection(db, 'projects'), 
+            where('userId', '==', user.uid)
+          );
+          const projectsSnapshot = await getDocs(projectsQuery);
+          
+          // Fetch Tasks
+          const tasksQuery = query(
+            collection(db, 'tasks'), 
+            where('userId', '==', user.uid)
+          );
+          const tasksSnapshot = await getDocs(tasksQuery);
+          
+          const tasksByProject: Record<string, any[]> = {};
+          tasksSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (!tasksByProject[data.projectId]) {
+              tasksByProject[data.projectId] = [];
+            }
+            tasksByProject[data.projectId].push(data);
+          });
+
+          const projects: Project[] = projectsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            const projectTasks = tasksByProject[data.id] || [];
+            
+            return {
+              id: data.id,
+              name: data.name,
+              description: data.description,
+              completed: data.completed,
+              createdAt: new Date(data.createdAt),
+              completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+              priority: data.priority as Priority,
+              startDate: data.startDate ? new Date(data.startDate) : undefined,
+              endDate: data.endDate ? new Date(data.endDate) : undefined,
+              tasks: projectTasks
+                .sort((a: any, b: any) => a.order - b.order)
+                .map((t: any) => ({
+                  id: t.id,
+                  title: t.title,
+                  description: t.description,
+                  completed: t.completed,
+                  order: t.order,
+                })),
+            };
+          }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+          dispatch({ type: 'SET_PROJECTS', payload: projects });
+        } catch (error) {
+          console.error('Error fetching projects:', error);
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
+      } else {
+        // Load from local storage
+        const savedProjects = loadProjects();
+        dispatch({ type: 'SET_PROJECTS', payload: savedProjects });
+      }
+      
+      // Set active project if none selected
+      if (!state.activeProjectId) {
+        const activeProject = state.projects.find(p => !p.completed);
+        if (activeProject) {
+          dispatch({ type: 'SET_ACTIVE_PROJECT', payload: activeProject.id });
+        }
+      }
+    };
+
+    fetchProjects();
+  }, [user, authLoading]);
+
+  // Save projects to localStorage ONLY if guest
+  useEffect(() => {
+    if (!user && !authLoading) {
+      saveProjects(state.projects);
+    }
+  }, [state.projects, user, authLoading]);
+
+  const dispatchWithSync = (action: Action) => {
+    // Limit check for free users (both guest and logged in for now)
+    if (action.type === 'ADD_PROJECT') {
+      const currentTaskCount = state.projects.reduce((acc, p) => acc + p.tasks.length, 0);
+      const newTaskCount = action.payload.tasks.length;
+      // Limit to 30 tasks
+      if (currentTaskCount + newTaskCount > 30) {
+        const msg = "You have reached the limit of 30 tasks. Please upgrade to add more.";
+        alert(msg);
+        throw new Error(msg);
       }
     }
-  }, []);
 
-  // Save projects to localStorage whenever they change
-  useEffect(() => {
-    saveProjects(state.projects);
-  }, [state.projects]);
+    // Optimistic update
+    dispatch(action);
+
+    // Sync to Firebase if logged in
+    if (user && !authLoading) {
+      (async () => {
+        try {
+          switch (action.type) {
+            case 'ADD_PROJECT': {
+              const project = action.payload;
+              const batch = writeBatch(db);
+              
+              const projectRef = doc(db, 'projects', project.id);
+              batch.set(projectRef, {
+                id: project.id,
+                userId: user.uid,
+                name: project.name,
+                description: project.description,
+                completed: project.completed,
+                createdAt: project.createdAt.toISOString(),
+                priority: project.priority || 'medium',
+                startDate: project.startDate?.toISOString() || null,
+                endDate: project.endDate?.toISOString() || null,
+              });
+
+              if (project.tasks.length > 0) {
+                project.tasks.forEach(task => {
+                  const taskRef = doc(db, 'tasks', task.id);
+                  batch.set(taskRef, {
+                    id: task.id,
+                    projectId: project.id,
+                    userId: user.uid,
+                    title: task.title,
+                    description: task.description,
+                    completed: task.completed,
+                    order: task.order,
+                  });
+                });
+              }
+              
+              await batch.commit();
+              break;
+            }
+
+            case 'DELETE_PROJECT':
+              await deleteDoc(doc(db, 'projects', action.payload));
+              // Note: Tasks are not automatically deleted in Firestore. 
+              // In a real app, we should delete them too.
+              break;
+
+            case 'UPDATE_PROJECT': {
+              const { projectId, updates } = action.payload;
+              const dbUpdates: any = {};
+              if (updates.name !== undefined) dbUpdates.name = updates.name;
+              if (updates.description !== undefined) dbUpdates.description = updates.description;
+              if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
+              if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
+              if (updates.startDate !== undefined) dbUpdates.startDate = updates.startDate?.toISOString() || null;
+              if (updates.endDate !== undefined) dbUpdates.endDate = updates.endDate?.toISOString() || null;
+              
+              if (Object.keys(dbUpdates).length > 0) {
+                await updateDoc(doc(db, 'projects', projectId), dbUpdates);
+              }
+              break;
+            }
+
+            case 'COMPLETE_TASK':
+            case 'UNCOMPLETE_TASK': {
+              const { taskId } = action.payload;
+              const completed = action.type === 'COMPLETE_TASK';
+              await updateDoc(doc(db, 'tasks', taskId), { completed });
+              break;
+            }
+
+            case 'UPDATE_TASK': {
+              const { taskId, updates } = action.payload;
+              const dbUpdates: any = {};
+              if (updates.title !== undefined) dbUpdates.title = updates.title;
+              if (updates.description !== undefined) dbUpdates.description = updates.description;
+              if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
+              if (updates.order !== undefined) dbUpdates.order = updates.order;
+
+              if (Object.keys(dbUpdates).length > 0) {
+                await updateDoc(doc(db, 'tasks', taskId), dbUpdates);
+              }
+              break;
+            }
+
+            case 'REORDER_TASKS': {
+              const { tasks } = action.payload;
+              const batch = writeBatch(db);
+              tasks.forEach(task => {
+                const taskRef = doc(db, 'tasks', task.id);
+                batch.update(taskRef, { order: task.order });
+              });
+              await batch.commit();
+              break;
+            }
+
+            case 'COMPLETE_PROJECT':
+              await updateDoc(doc(db, 'projects', action.payload), { 
+                completed: true, 
+                completedAt: new Date().toISOString() 
+              });
+              break;
+
+            case 'REOPEN_PROJECT':
+              await updateDoc(doc(db, 'projects', action.payload), { 
+                completed: false, 
+                completedAt: null 
+              });
+              break;
+          }
+        } catch (error) {
+          console.error('Sync error:', error);
+        }
+      })();
+    }
+  };
 
   const activeProject = state.projects.find(p => p.id === state.activeProjectId);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, activeProject }}>
+    <AppContext.Provider value={{ state, dispatch: dispatchWithSync, activeProject }}>
       {children}
     </AppContext.Provider>
   );
