@@ -132,7 +132,14 @@
   word-break: break-word;
 }
 
-.task-edit-input {
+.task-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.task-edit-input,
+.task-edit-textarea {
   width: 100%;
   padding: 0.375rem 0.5rem;
   border: 2px solid var(--primary-color);
@@ -143,8 +150,52 @@
   color: var(--text-primary);
 }
 
-.task-edit-input:focus {
+.task-edit-textarea {
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.task-edit-input:focus,
+.task-edit-textarea:focus {
   outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.task-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: none;
+}
+
+.save-btn {
+  background: var(--primary-color);
+  color: white;
+}
+
+.cancel-btn {
+  background: var(--bg-tertiary, #e2e8f0);
+  color: var(--text-secondary);
+}
+
+.task-display {
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.task-display:hover {
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 .task-drag-handle {

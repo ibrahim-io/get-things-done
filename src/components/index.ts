@@ -5,4 +5,5 @@ export { FocusMode } from './FocusMode';
 export { CompletedTab } from './CompletedTab';
 export { TabBar } from './TabBar';
 export { ProjectList } from './ProjectList';
+export { ProjectGantt } from './ProjectGantt';
 export { Auth } from './Auth';

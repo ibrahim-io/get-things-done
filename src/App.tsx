@@ -4,6 +4,7 @@ import {
   Header,
   ProjectInput,
   ProjectList,
+  ProjectGantt,
   FocusMode,
   CompletedTab,
   TabBar,
@@ -22,14 +23,14 @@ function AppContent() {
       <Header title="Get Things Done" />
       <TabBar />
       
-      {state.activeTab === 'active' ? (
+      {state.activeTab === 'active' && (
         <>
           <ProjectInput />
           <ProjectList />
         </>
-      ) : (
-        <CompletedTab />
       )}
+      {state.activeTab === 'gantt' && <ProjectGantt />}
+      {state.activeTab === 'completed' && <CompletedTab />}
     </div>
   );
 }

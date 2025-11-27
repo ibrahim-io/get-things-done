@@ -23,6 +23,12 @@ export function TabBar() {
         )}
       </button>
       <button
+        className={`tab-btn ${state.activeTab === 'gantt' ? 'active' : ''}`}
+        onClick={() => handleTabChange('gantt')}
+      >
+        Gantt
+      </button>
+      <button
         className={`tab-btn ${state.activeTab === 'completed' ? 'active' : ''}`}
         onClick={() => handleTabChange('completed')}
       >

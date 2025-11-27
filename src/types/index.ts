@@ -28,4 +28,4 @@ export interface AppState {
   currentTaskIndex: number;
 }
 
-export type TabType = 'active' | 'completed';
+export type TabType = 'active' | 'gantt' | 'completed';

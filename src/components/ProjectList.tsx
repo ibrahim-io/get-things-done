@@ -173,9 +173,19 @@ export function ProjectList() {
                   </div>
                 </div>
                 <div className="project-meta">
-                  <span className="task-count">
-                    {project.tasks.filter(t => !t.completed).length} tasks
-                  </span>
+                  <div className="project-progress">
+                    <div className="progress-text">
+                      {project.tasks.filter(t => t.completed).length}/{project.tasks.length} completed
+                    </div>
+                    <div className="progress-bar-bg">
+                      <div 
+                        className="progress-bar-fill"
+                        style={{ 
+                          width: `${project.tasks.length ? (project.tasks.filter(t => t.completed).length / project.tasks.length) * 100 : 0}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
                   <button 
                     className="edit-btn"
                     onClick={(e) => startEditing(e, project)}

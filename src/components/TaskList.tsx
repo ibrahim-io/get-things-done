@@ -15,6 +15,7 @@ interface TaskItemProps {
 function TaskItem({ task, projectId, onDragStart, onDragOver, onDrop, index }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
+  const [editDescription, setEditDescription] = useState(task.description || '');
   const { dispatch } = useApp();
 
   const handleToggle = () => {
@@ -29,17 +30,26 @@ function TaskItem({ task, projectId, onDragStart, onDragOver, onDrop, index }: T
     if (editTitle.trim()) {
       dispatch({
         type: 'UPDATE_TASK',
-        payload: { projectId, taskId: task.id, updates: { title: editTitle.trim() } },
+        payload: { 
+          projectId, 
+          taskId: task.id, 
+          updates: { 
+            title: editTitle.trim(),
+            description: editDescription.trim() || undefined
+          } 
+        },
       });
     }
     setIsEditing(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSave();
     } else if (e.key === 'Escape') {
       setEditTitle(task.title);
+      setEditDescription(task.description || '');
       setIsEditing(false);
     }
   };
@@ -64,24 +74,38 @@ function TaskItem({ task, projectId, onDragStart, onDragOver, onDrop, index }: T
       
       <div className="task-content">
         {isEditing ? (
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onBlur={handleSave}
-            onKeyDown={handleKeyDown}
-            className="task-edit-input"
-            autoFocus
-          />
+          <div className="task-edit-container">
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="task-edit-input"
+              autoFocus
+              placeholder="Task title"
+            />
+            <textarea
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="task-edit-textarea"
+              placeholder="Description (optional)"
+              rows={2}
+            />
+            <div className="task-edit-actions">
+              <button onClick={handleSave} className="save-btn">Save</button>
+              <button onClick={() => setIsEditing(false)} className="cancel-btn">Cancel</button>
+            </div>
+          </div>
         ) : (
-          <>
-            <span className="task-title" onClick={() => !task.completed && setIsEditing(true)}>
+          <div onClick={() => !task.completed && setIsEditing(true)} className="task-display">
+            <span className="task-title">
               {task.title}
             </span>
             {task.description && (
               <span className="task-description">{task.description}</span>
             )}
-          </>
+          </div>
         )}
       </div>
 
