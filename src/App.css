@@ -1,0 +1,11 @@
+.app {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  .app {
+    padding-bottom: 1rem;
+  }
+}
