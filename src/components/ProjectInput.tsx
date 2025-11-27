@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { generateTasks, getStoredApiKey, setStoredApiKey } from '../services/openai';
 import { useApp } from '../hooks/useApp';
@@ -15,6 +15,7 @@ export function ProjectInput() {
 
   const {
     transcript,
+    interimTranscript,
     isListening,
     isSupported,
     startListening,
@@ -23,10 +24,12 @@ export function ProjectInput() {
   } = useSpeechRecognition();
 
   useEffect(() => {
-    if (transcript) {
-      setProjectIdea(transcript);
+    // Combine final transcript with interim for display
+    const fullTranscript = transcript + interimTranscript;
+    if (fullTranscript) {
+      setProjectIdea(fullTranscript);
     }
-  }, [transcript]);
+  }, [transcript, interimTranscript]);
 
   const handleVoiceToggle = () => {
     if (isListening) {

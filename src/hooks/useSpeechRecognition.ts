@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseSpeechRecognitionReturn {
   transcript: string;
+  interimTranscript: string;
   isListening: boolean;
   isSupported: boolean;
   startListening: () => void;
@@ -60,8 +61,10 @@ declare global {
 
 export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const finalTranscriptRef = useRef('');
 
   const isSupported = typeof window !== 'undefined' && 
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
@@ -77,19 +80,19 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     recognition.lang = 'en-US';
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
+      let currentInterim = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         if (result.isFinal) {
-          finalTranscript += result[0].transcript;
+          finalTranscriptRef.current += result[0].transcript;
         } else {
-          interimTranscript += result[0].transcript;
+          currentInterim += result[0].transcript;
         }
       }
 
-      setTranscript(prev => prev + finalTranscript + interimTranscript);
+      setTranscript(finalTranscriptRef.current);
+      setInterimTranscript(currentInterim);
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -99,6 +102,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     recognition.onend = () => {
       setIsListening(false);
+      setInterimTranscript('');
     };
 
     recognitionRef.current = recognition;
@@ -112,7 +116,9 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
   const startListening = useCallback(() => {
     if (recognitionRef.current && !isListening) {
+      finalTranscriptRef.current = '';
       setTranscript('');
+      setInterimTranscript('');
       recognitionRef.current.start();
       setIsListening(true);
     }
@@ -122,15 +128,19 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     if (recognitionRef.current && isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
+      setInterimTranscript('');
     }
   }, [isListening]);
 
   const resetTranscript = useCallback(() => {
+    finalTranscriptRef.current = '';
     setTranscript('');
+    setInterimTranscript('');
   }, []);
 
   return {
     transcript,
+    interimTranscript,
     isListening,
     isSupported,
     startListening,
