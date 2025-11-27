@@ -1,0 +1,159 @@
+.completed-tab {
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.completed-tab-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.completed-projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.completed-project {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.completed-project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.completed-project-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.completed-project-date {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.completed-project-stats {
+  margin-bottom: 0.75rem;
+}
+
+.stat-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.completed-tasks-preview {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.completed-task-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.preview-checkbox {
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.preview-checkbox.checked {
+  color: #10b981;
+}
+
+.preview-title {
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.more-tasks {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.5rem;
+}
+
+.completed-project-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reopen-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.reopen-btn:hover {
+  background: #e5e7eb;
+}
+
+.delete-btn {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
