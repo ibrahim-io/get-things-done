@@ -14,6 +14,10 @@ import type { Project, Task, TabType, Priority } from '../types';
 import { saveProjects, loadProjects } from '../services/storage';
 import { useAuth } from './AuthContext';
 
+// Limits
+const PROJECT_LIMIT_GUEST = 3;
+const PROJECT_LIMIT_LOGGED_IN = 10;
+
 interface AppState {
   projects: Project[];
   activeProjectId: string | null;
@@ -312,13 +316,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state.projects, user, authLoading]);
 
   const dispatchWithSync = (action: Action) => {
-    // Limit check for free users (both guest and logged in for now)
+    // Project limit check
     if (action.type === 'ADD_PROJECT') {
-      const currentTaskCount = state.projects.reduce((acc, p) => acc + p.tasks.length, 0);
-      const newTaskCount = action.payload.tasks.length;
-      // Limit to 30 tasks
-      if (currentTaskCount + newTaskCount > 30) {
-        const msg = "You have reached the limit of 30 tasks. Please upgrade to add more.";
+      const currentProjectCount = state.projects.length;
+      const projectLimit = user ? PROJECT_LIMIT_LOGGED_IN : PROJECT_LIMIT_GUEST;
+      
+      if (currentProjectCount >= projectLimit) {
+        const msg = user 
+          ? `You have reached the limit of ${projectLimit} projects. Please upgrade to add more.`
+          : `Guest users can only create ${projectLimit} projects. Please sign in to create up to ${PROJECT_LIMIT_LOGGED_IN} projects.`;
         alert(msg);
         throw new Error(msg);
       }
