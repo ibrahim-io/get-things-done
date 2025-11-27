@@ -1,20 +1,12 @@
 import type { Task } from '../types';
 
-const OPENAI_API_KEY_STORAGE_KEY = 'openai_api_key';
+const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
-export const getStoredApiKey = (): string | null => {
-  return localStorage.getItem(OPENAI_API_KEY_STORAGE_KEY);
-};
+export async function generateTasks(projectIdea: string): Promise<Task[]> {
+  if (!API_KEY) {
+    throw new Error('OpenAI API key is not configured. Please check your environment variables.');
+  }
 
-export const setStoredApiKey = (apiKey: string): void => {
-  localStorage.setItem(OPENAI_API_KEY_STORAGE_KEY, apiKey);
-};
-
-export const clearStoredApiKey = (): void => {
-  localStorage.removeItem(OPENAI_API_KEY_STORAGE_KEY);
-};
-
-export async function generateTasks(projectIdea: string, apiKey: string): Promise<Task[]> {
   const systemPrompt = `You are a GTD (Getting Things Done) productivity expert. Given a project idea, break it down into clear, actionable tasks following GTD methodology.
 
 Guidelines:
@@ -37,7 +29,7 @@ Only respond with valid JSON, no additional text.`;
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',

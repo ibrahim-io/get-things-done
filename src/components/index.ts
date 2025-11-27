@@ -4,4 +4,4 @@ export { TaskList } from './TaskList';
 export { FocusMode } from './FocusMode';
 export { CompletedTab } from './CompletedTab';
 export { TabBar } from './TabBar';
-export { ProjectSelector } from './ProjectSelector';
+export { ProjectList } from './ProjectList';

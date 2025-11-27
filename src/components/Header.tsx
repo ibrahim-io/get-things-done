@@ -1,3 +1,4 @@
+import { useTheme } from '../context/ThemeContext';
 import './Header.css';
 
 interface HeaderProps {
@@ -5,9 +6,20 @@ interface HeaderProps {
 }
 
 export function Header({ title }: HeaderProps) {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <header className="header">
-      <h1 className="header-title">{title}</h1>
+      <div className="header-content">
+        <h1 className="header-title">{title}</h1>
+        <button 
+          className="theme-toggle" 
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+      </div>
       <p className="header-subtitle">AI-powered task planning</p>
     </header>
   );

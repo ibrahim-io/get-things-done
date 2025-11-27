@@ -4,52 +4,7 @@
   margin: 0 auto;
 }
 
-.api-key-section {
-  margin-bottom: 1.5rem;
-}
-
-.input-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-.help-btn {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 50%;
-  border: 1px solid #9ca3af;
-  background: transparent;
-  color: #6b7280;
-  font-size: 0.75rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.help-btn:hover {
-  background: #f3f4f6;
-}
-
-.api-key-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.api-key-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
+/* API key styles removed */
 
 .idea-section {
   margin-bottom: 1rem;
@@ -63,23 +18,25 @@
   width: 100%;
   padding: 1rem;
   padding-right: 3rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 0.75rem;
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
   min-height: 100px;
   transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .idea-textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--border-focus);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .idea-textarea::placeholder {
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .voice-btn {
@@ -90,8 +47,8 @@
   height: 2.5rem;
   border: none;
   border-radius: 50%;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -100,11 +57,11 @@
 }
 
 .voice-btn:hover {
-  background: #e5e7eb;
+  background: var(--border-color);
 }
 
 .voice-btn.listening {
-  background: #ef4444;
+  background: var(--error-color);
   color: white;
   animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
@@ -127,13 +84,13 @@
   gap: 0.5rem;
   margin-top: 0.5rem;
   font-size: 0.875rem;
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 .pulse {
   width: 8px;
   height: 8px;
-  background: #ef4444;
+  background: var(--error-color);
   border-radius: 50%;
   animation: pulse 1s infinite;
 }
@@ -148,19 +105,19 @@
 }
 
 .error-message {
-  color: #ef4444;
+  color: var(--error-color);
   font-size: 0.875rem;
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: #fef2f2;
+  background: var(--error-bg);
   border-radius: 0.5rem;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--error-border);
 }
 
 .submit-btn {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-gradient);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -199,18 +156,4 @@
   }
 }
 
-.change-api-key-btn {
-  display: block;
-  margin: 1rem auto 0;
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: none;
-  color: #6b7280;
-  font-size: 0.875rem;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.change-api-key-btn:hover {
-  color: #374151;
-}
+/* Change API key button styles removed */

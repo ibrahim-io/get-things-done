@@ -3,11 +3,10 @@ import { useApp } from './hooks/useApp';
 import {
   Header,
   ProjectInput,
-  TaskList,
+  ProjectList,
   FocusMode,
   CompletedTab,
   TabBar,
-  ProjectSelector,
 } from './components';
 import './App.css';
 
@@ -26,8 +25,7 @@ function AppContent() {
       {state.activeTab === 'active' ? (
         <>
           <ProjectInput />
-          <ProjectSelector />
-          {activeProject && <TaskList />}
+          <ProjectList />
         </>
       ) : (
         <CompletedTab />

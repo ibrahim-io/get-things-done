@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../hooks/useApp';
-import type { Task } from '../types';
+import type { Task, Project } from '../types';
 import './TaskList.css';
 
 interface TaskItemProps {
@@ -96,20 +96,16 @@ function TaskItem({ task, projectId, onDragStart, onDragOver, onDrop, index }: T
   );
 }
 
-export function TaskList() {
-  const { dispatch, activeProject } = useApp();
+interface TaskListProps {
+  project: Project;
+}
+
+export function TaskList({ project }: TaskListProps) {
+  const { dispatch } = useApp();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  if (!activeProject) {
-    return (
-      <div className="task-list-empty">
-        <p>No active project. Create one above!</p>
-      </div>
-    );
-  }
-
-  const incompleteTasks = activeProject.tasks.filter(t => !t.completed);
-  const completedTasks = activeProject.tasks.filter(t => t.completed);
+  const incompleteTasks = project.tasks.filter(t => !t.completed);
+  const completedTasks = project.tasks.filter(t => t.completed);
   const allComplete = incompleteTasks.length === 0 && completedTasks.length > 0;
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -138,16 +134,17 @@ export function TaskList() {
 
     dispatch({
       type: 'REORDER_TASKS',
-      payload: { projectId: activeProject.id, tasks: reorderedTasks },
+      payload: { projectId: project.id, tasks: reorderedTasks },
     });
     setDraggedIndex(null);
   };
 
   const handleCompleteProject = () => {
-    dispatch({ type: 'COMPLETE_PROJECT', payload: activeProject.id });
+    dispatch({ type: 'COMPLETE_PROJECT', payload: project.id });
   };
 
   const handleEnterFocusMode = () => {
+    dispatch({ type: 'SET_ACTIVE_PROJECT', payload: project.id });
     dispatch({ type: 'SET_FOCUS_MODE', payload: true });
     dispatch({ type: 'SET_CURRENT_TASK_INDEX', payload: 0 });
   };
@@ -155,7 +152,6 @@ export function TaskList() {
   return (
     <div className="task-list">
       <div className="task-list-header">
-        <h2 className="project-title">{activeProject.name}</h2>
         <div className="task-list-actions">
           {incompleteTasks.length > 0 && (
             <button className="focus-mode-btn" onClick={handleEnterFocusMode}>
@@ -187,7 +183,7 @@ export function TaskList() {
               <TaskItem
                 key={task.id}
                 task={task}
-                projectId={activeProject.id}
+                projectId={project.id}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
@@ -205,7 +201,7 @@ export function TaskList() {
                 <TaskItem
                   key={task.id}
                   task={task}
-                  projectId={activeProject.id}
+                  projectId={project.id}
                   onDragStart={() => {}}
                   onDragOver={() => {}}
                   onDrop={() => {}}

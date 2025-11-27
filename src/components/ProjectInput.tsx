@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { generateTasks, getStoredApiKey, setStoredApiKey } from '../services/openai';
+import { generateTasks } from '../services/openai';
 import { useApp } from '../hooks/useApp';
 import type { Project } from '../types';
 import './ProjectInput.css';
 
 export function ProjectInput() {
   const [projectIdea, setProjectIdea] = useState('');
-  const [apiKey, setApiKey] = useState(getStoredApiKey() || '');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(!getStoredApiKey());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { dispatch } = useApp();
@@ -48,22 +46,12 @@ export function ProjectInput() {
       return;
     }
 
-    if (!apiKey.trim()) {
-      setError('Please enter your OpenAI API key');
-      setShowApiKeyInput(true);
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
-      const tasks = await generateTasks(projectIdea.trim(), apiKey.trim());
+      const tasks = await generateTasks(projectIdea.trim());
       
-      // Save API key for future use
-      setStoredApiKey(apiKey.trim());
-      setShowApiKeyInput(false);
-
       const newProject: Project = {
         id: crypto.randomUUID(),
         name: projectIdea.trim().slice(0, 50) + (projectIdea.length > 50 ? '...' : ''),
@@ -86,29 +74,6 @@ export function ProjectInput() {
   return (
     <div className="project-input">
       <form onSubmit={handleSubmit}>
-        {showApiKeyInput && (
-          <div className="api-key-section">
-            <label htmlFor="apiKey" className="input-label">
-              OpenAI API Key
-              <button
-                type="button"
-                className="help-btn"
-                onClick={() => window.open('https://platform.openai.com/api-keys', '_blank')}
-              >
-                ?
-              </button>
-            </label>
-            <input
-              type="password"
-              id="apiKey"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-..."
-              className="api-key-input"
-            />
-          </div>
-        )}
-
         <div className="idea-section">
           <label htmlFor="projectIdea" className="input-label">
             What's your project idea?
@@ -169,16 +134,6 @@ export function ProjectInput() {
           )}
         </button>
       </form>
-
-      {!showApiKeyInput && (
-        <button
-          type="button"
-          className="change-api-key-btn"
-          onClick={() => setShowApiKeyInput(true)}
-        >
-          Change API Key
-        </button>
-      )}
     </div>
   );
 }

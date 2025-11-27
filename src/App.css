@@ -1,6 +1,8 @@
 .app {
   min-height: 100vh;
-  background: #f9fafb;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Mobile-first responsive design */

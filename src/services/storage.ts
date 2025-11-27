@@ -13,10 +13,12 @@ export function loadProjects(): Project[] {
   try {
     const projects = JSON.parse(data);
     // Convert date strings back to Date objects
-    return projects.map((p: Project & { createdAt: string; completedAt?: string }) => ({
+    return projects.map((p: Project & { createdAt: string; completedAt?: string; startDate?: string; endDate?: string }) => ({
       ...p,
       createdAt: new Date(p.createdAt),
       completedAt: p.completedAt ? new Date(p.completedAt) : undefined,
+      startDate: p.startDate ? new Date(p.startDate) : undefined,
+      endDate: p.endDate ? new Date(p.endDate) : undefined,
     }));
   } catch {
     return [];

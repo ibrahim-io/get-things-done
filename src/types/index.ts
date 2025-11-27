@@ -6,6 +6,8 @@ export interface Task {
   order: number;
 }
 
+export type Priority = 'low' | 'medium' | 'high';
+
 export interface Project {
   id: string;
   name: string;
@@ -14,6 +16,9 @@ export interface Project {
   completed: boolean;
   createdAt: Date;
   completedAt?: Date;
+  priority?: Priority;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export interface AppState {

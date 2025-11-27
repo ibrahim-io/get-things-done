@@ -24,6 +24,7 @@ type Action =
   | { type: 'COMPLETE_TASK'; payload: { projectId: string; taskId: string } }
   | { type: 'UNCOMPLETE_TASK'; payload: { projectId: string; taskId: string } }
   | { type: 'UPDATE_TASK'; payload: { projectId: string; taskId: string; updates: Partial<Task> } }
+  | { type: 'UPDATE_PROJECT'; payload: { projectId: string; updates: Partial<Project> } }
   | { type: 'REORDER_TASKS'; payload: { projectId: string; tasks: Task[] } }
   | { type: 'COMPLETE_PROJECT'; payload: string }
   | { type: 'REOPEN_PROJECT'; payload: string }
@@ -137,6 +138,16 @@ function reducer(state: AppState, action: Action): AppState {
                 ),
               }
             : p
+        ),
+      };
+    }
+
+    case 'UPDATE_PROJECT': {
+      const { projectId, updates } = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map(p =>
+          p.id === projectId ? { ...p, ...updates } : p
         ),
       };
     }
